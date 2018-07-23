@@ -4,7 +4,7 @@
  * @module std/assembly/collector/itcm
  *//***/
 
-// Largely based on the Bach Le's μgc, see: https://github.com/bullno1/ugc
+// Largely based on Bach Le's μgc, see: https://github.com/bullno1/ugc
 
 const TRACE = false;
 
@@ -35,8 +35,8 @@ var state = State.INIT;
 var white = 0;
 
 // From and to spaces
-var from: ManagedObjectList;
-var to: ManagedObjectList;
+var fromSpace: ManagedObjectList;
+var toSpace: ManagedObjectList;
 var iter: ManagedObject;
 
 // ╒═══════════════ Managed object layout (32-bit) ════════════════╕
@@ -47,15 +47,14 @@ var iter: ManagedObject;
 // ├─────────────────────────────────────────────────────────┴─┴───┤   │ usize
 // │                              prev                             │ ◄─┘
 // ├───────────────────────────────────────────────────────────────┤
-// │                             visitFn                           │
+// │                             markFn                            │
 // ╞═══════════════════════════════════════════════════════════════╡ SIZE ┘ ◄─ user-space reference
 // │                          ... data ...                         │
 // └───────────────────────────────────────────────────────────────┘
 // C: color
 
 /** Represents a managed object in memory, consisting of a header followed by the object's data. */
-@unmanaged
-class ManagedObject {
+@unmanaged class ManagedObject {
 
   /** Pointer to the next object with color flags stored in the alignment bits. */
   nextWithColor: usize;
@@ -63,8 +62,8 @@ class ManagedObject {
   /** Pointer to the previous object. */
   prev: ManagedObject;
 
-  /** Visitor function called with the user-space reference. */
-  visitFn: (ref: usize) => void;
+  /** Object-specific mark function called with the user-space reference. */
+  markFn: (ref: usize) => void;
 
   /** Size of a managed object after alignment. */
   static readonly SIZE: usize = (offsetof<ManagedObject>() + AL_MASK) & ~AL_MASK;
@@ -104,14 +103,13 @@ class ManagedObject {
     const gray = 2;
     if (this == iter) iter = this.prev;
     this.unlink();
-    to.push(this);
+    toSpace.push(this);
     this.nextWithColor = (this.nextWithColor & ~3) | gray;
   }
 }
 
 /** A list of managed objects. Used for the from and to spaces. */
-@unmanaged
-class ManagedObjectList extends ManagedObject {
+@unmanaged class ManagedObjectList extends ManagedObject {
 
   /** Inserts an object. */
   push(obj: ManagedObject): void {
@@ -137,13 +135,13 @@ function step(): void {
   switch (state) {
     case State.INIT: {
       if (TRACE) trace("gc~step/INIT");
-      from = changetype<ManagedObjectList>(memory.allocate(ManagedObject.SIZE));
-      from.visitFn = changetype<(ref: usize) => void>(<u32>-1); // would error
-      from.clear();
-      to = changetype<ManagedObjectList>(memory.allocate(ManagedObject.SIZE));
-      to.visitFn = changetype<(ref: usize) => void>(<u32>-1); // would error
-      to.clear();
-      iter = to;
+      fromSpace = changetype<ManagedObjectList>(memory.allocate(ManagedObject.SIZE));
+      fromSpace.markFn = changetype<(ref: usize) => void>(<u32>-1); // would error
+      fromSpace.clear();
+      toSpace = changetype<ManagedObjectList>(memory.allocate(ManagedObject.SIZE));
+      toSpace.markFn = changetype<(ref: usize) => void>(<u32>-1); // would error
+      toSpace.clear();
+      iter = toSpace;
       state = State.IDLE;
       if (TRACE) trace("gc~state = IDLE");
       // fall-through
@@ -157,21 +155,21 @@ function step(): void {
     }
     case State.MARK: {
       obj = iter.next;
-      if (obj !== to) {
+      if (obj !== toSpace) {
         if (TRACE) trace("gc~step/MARK iterate", 1, objToRef(obj));
         iter = obj;
         obj.color = <i32>!white;
-        obj.visitFn(objToRef(obj));
+        obj.markFn(objToRef(obj));
       } else {
         if (TRACE) trace("gc~step/MARK finish");
         iterateRoots(__gc_mark);
         obj = iter.next;
-        if (obj === to) {
-          let prevFrom = from;
-          from = to;
-          to = prevFrom;
+        if (obj === toSpace) {
+          let from = fromSpace;
+          fromSpace = toSpace;
+          toSpace = from;
           white = <i32>!white;
-          iter = prevFrom.next;
+          iter = from.next;
           state = State.SWEEP;
           if (TRACE) trace("gc~state = SWEEP");
         }
@@ -180,13 +178,13 @@ function step(): void {
     }
     case State.SWEEP: {
       obj = iter;
-      if (obj !== to) {
+      if (obj !== toSpace) {
         if (TRACE) trace("gc~step/SWEEP free", 1, objToRef(obj));
         iter = obj.next;
         memory.free(changetype<usize>(obj));
       } else {
         if (TRACE) trace("gc~step/SWEEP finish");
-        to.clear();
+        toSpace.clear();
         state = State.IDLE;
         if (TRACE) trace("gc~state = IDLE");
       }
@@ -207,15 +205,15 @@ function step(): void {
 
 @global export function __gc_allocate(
   size: usize,
-  visitFn: (ref: usize) => void
+  markFn: (ref: usize) => void
 ): usize {
   if (TRACE) trace("gc.allocate", 1, size);
   if (size > MAX_SIZE_32 - ManagedObject.SIZE) unreachable();
   step(); // also makes sure it's initialized
   var obj = changetype<ManagedObject>(memory.allocate(ManagedObject.SIZE + size));
-  obj.visitFn = visitFn;
+  obj.markFn = markFn;
   obj.color = white;
-  from.push(obj);
+  fromSpace.push(obj);
   return objToRef(obj);
 }
 

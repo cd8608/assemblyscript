@@ -104,7 +104,7 @@
    (get_local $0)
   )
  )
- (func $~lib/memory/memcmp (; 3 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
+ (func $~lib/internal/memory/memcmp (; 3 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
   (local $3 i32)
   (if
    (i32.eq
@@ -174,14 +174,7 @@
    )
   )
  )
- (func $~lib/memory/memory.compare (; 4 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
-  (call $~lib/memory/memcmp
-   (get_local $0)
-   (get_local $1)
-   (get_local $2)
-  )
- )
- (func $~lib/string/String.__eq (; 5 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
+ (func $~lib/string/String.__eq (; 4 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
   (local $2 i32)
   (if
    (i32.eq
@@ -228,7 +221,7 @@
    )
   )
   (i32.eqz
-   (call $~lib/memory/memory.compare
+   (call $~lib/internal/memory/memcmp
     (i32.add
      (get_local $0)
      (i32.const 4)
@@ -244,7 +237,7 @@
    )
   )
  )
- (func $object-literal/bar (; 6 ;) (type $iv) (param $0 i32)
+ (func $object-literal/bar (; 5 ;) (type $iv) (param $0 i32)
   (if
    (i32.ne
     (i32.load
@@ -282,7 +275,7 @@
    )
   )
  )
- (func $object-literal/bar2 (; 7 ;) (type $iv) (param $0 i32)
+ (func $object-literal/bar2 (; 6 ;) (type $iv) (param $0 i32)
   (if
    (i32.ne
     (i32.load
@@ -301,7 +294,7 @@
    )
   )
  )
- (func $object-literal/Foo2#test (; 8 ;) (type $iv) (param $0 i32)
+ (func $object-literal/Foo2#test (; 7 ;) (type $iv) (param $0 i32)
   (if
    (i32.ne
     (i32.load
@@ -320,7 +313,7 @@
    )
   )
  )
- (func $start (; 9 ;) (type $v)
+ (func $start (; 8 ;) (type $v)
   (local $0 i32)
   (set_global $~lib/allocator/arena/startOffset
    (i32.const 80)

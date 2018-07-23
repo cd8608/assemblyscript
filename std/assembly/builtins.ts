@@ -12,6 +12,7 @@
 @builtin export declare function isArray<T>(value?: T): bool;
 @builtin export declare function isDefined(expression: void): bool;
 @builtin export declare function isConstant(expression: void): bool;
+@builtin export declare function isManaged<T>(value?: T): bool;
 @inline export function isNaN<T>(value: T): bool { return value != value; }
 @inline export function isFinite<T>(value: T): bool { return value - value == 0; }
 

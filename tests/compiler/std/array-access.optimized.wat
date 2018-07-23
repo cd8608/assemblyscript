@@ -59,7 +59,7 @@
    )
   )
  )
- (func $~lib/memory/memcmp (; 4 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
+ (func $~lib/internal/memory/memcmp (; 4 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
   (local $3 i32)
   (if
    (i32.eq
@@ -129,14 +129,7 @@
    )
   )
  )
- (func $~lib/memory/memory.compare (; 5 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
-  (call $~lib/memory/memcmp
-   (get_local $0)
-   (get_local $1)
-   (get_local $2)
-  )
- )
- (func $~lib/string/String#startsWith (; 6 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
+ (func $~lib/string/String#startsWith (; 5 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
   (local $3 i32)
   (local $4 i32)
   (if
@@ -200,7 +193,7 @@
    )
   )
   (i32.eqz
-   (call $~lib/memory/memory.compare
+   (call $~lib/internal/memory/memcmp
     (i32.add
      (i32.add
       (get_local $0)
@@ -222,7 +215,7 @@
    )
   )
  )
- (func $std/array-access/stringArrayMethodCall (; 7 ;) (type $ii) (param $0 i32) (result i32)
+ (func $std/array-access/stringArrayMethodCall (; 6 ;) (type $ii) (param $0 i32) (result i32)
   (call $~lib/string/String#startsWith
    (call $~lib/array/Array<Array<i32>>#__get
     (get_local $0)
@@ -232,7 +225,7 @@
    (i32.const 0)
   )
  )
- (func $std/array-access/stringArrayArrayPropertyAccess (; 8 ;) (type $ii) (param $0 i32) (result i32)
+ (func $std/array-access/stringArrayArrayPropertyAccess (; 7 ;) (type $ii) (param $0 i32) (result i32)
   (i32.load
    (call $~lib/array/Array<Array<i32>>#__get
     (call $~lib/array/Array<Array<i32>>#__get
@@ -243,7 +236,7 @@
    )
   )
  )
- (func $std/array-access/stringArrayArrayMethodCall (; 9 ;) (type $ii) (param $0 i32) (result i32)
+ (func $std/array-access/stringArrayArrayMethodCall (; 8 ;) (type $ii) (param $0 i32) (result i32)
   (call $~lib/string/String#startsWith
    (call $~lib/array/Array<Array<i32>>#__get
     (call $~lib/array/Array<Array<i32>>#__get

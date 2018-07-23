@@ -127,7 +127,7 @@
    )
   )
  )
- (func $~lib/memory/memcmp (; 2 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
+ (func $~lib/internal/memory/memcmp (; 2 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
   (local $3 i32)
   (if
    (i32.eq
@@ -197,14 +197,7 @@
    )
   )
  )
- (func $~lib/memory/memory.compare (; 3 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
-  (call $~lib/memory/memcmp
-   (get_local $0)
-   (get_local $1)
-   (get_local $2)
-  )
- )
- (func $~lib/string/String#startsWith (; 4 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
+ (func $~lib/string/String#startsWith (; 3 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
   (local $3 i32)
   (local $4 i32)
   (if
@@ -268,7 +261,7 @@
    )
   )
   (i32.eqz
-   (call $~lib/memory/memory.compare
+   (call $~lib/internal/memory/memcmp
     (i32.add
      (i32.add
       (get_local $0)
@@ -290,7 +283,7 @@
    )
   )
  )
- (func $~lib/string/String#endsWith (; 5 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
+ (func $~lib/string/String#endsWith (; 4 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
   (local $3 i32)
   (if
    (i32.eqz
@@ -353,7 +346,7 @@
    )
   )
   (i32.eqz
-   (call $~lib/memory/memory.compare
+   (call $~lib/internal/memory/memcmp
     (i32.add
      (i32.add
       (get_local $0)
@@ -375,7 +368,7 @@
    )
   )
  )
- (func $~lib/string/String#endsWith|trampoline (; 6 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
+ (func $~lib/string/String#endsWith|trampoline (; 5 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
   (block $1of1
    (block $0of1
     (block $outOfRange
@@ -398,7 +391,7 @@
    (get_local $2)
   )
  )
- (func $~lib/string/String#indexOf (; 7 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
+ (func $~lib/string/String#indexOf (; 6 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
   (local $3 i32)
   (local $4 i32)
   (if
@@ -481,7 +474,7 @@
      )
     )
     (if
-     (call $~lib/memory/memory.compare
+     (call $~lib/internal/memory/memcmp
       (i32.add
        (i32.add
         (get_local $0)
@@ -518,7 +511,7 @@
   )
   (i32.const -1)
  )
- (func $~lib/string/String#includes (; 8 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
+ (func $~lib/string/String#includes (; 7 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
   (i32.ne
    (call $~lib/string/String#indexOf
     (get_local $0)
@@ -528,7 +521,7 @@
    (i32.const -1)
   )
  )
- (func $~lib/string/String#lastIndexOf (; 9 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
+ (func $~lib/string/String#lastIndexOf (; 8 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
   (local $3 i32)
   (local $4 i32)
   (if
@@ -611,7 +604,7 @@
      )
     )
     (if
-     (call $~lib/memory/memory.compare
+     (call $~lib/internal/memory/memcmp
       (i32.add
        (i32.add
         (get_local $0)
@@ -648,7 +641,7 @@
   )
   (i32.const -1)
  )
- (func $~lib/string/String#lastIndexOf|trampoline (; 10 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
+ (func $~lib/string/String#lastIndexOf|trampoline (; 9 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
   (block $1of1
    (block $0of1
     (block $outOfRange
@@ -671,10 +664,10 @@
    (get_local $2)
   )
  )
- (func $std/string/getString (; 11 ;) (type $i) (result i32)
+ (func $std/string/getString (; 10 ;) (type $i) (result i32)
   (get_global $std/string/str)
  )
- (func $~lib/internal/string/parse<f64> (; 12 ;) (type $iiF) (param $0 i32) (param $1 i32) (result f64)
+ (func $~lib/internal/string/parse<f64> (; 11 ;) (type $iiF) (param $0 i32) (param $1 i32) (result f64)
   (local $2 i32)
   (local $3 i32)
   (local $4 i32)
@@ -1037,13 +1030,13 @@
    (get_local $5)
   )
  )
- (func $~lib/string/parseInt (; 13 ;) (type $iiF) (param $0 i32) (param $1 i32) (result f64)
+ (func $~lib/string/parseInt (; 12 ;) (type $iiF) (param $0 i32) (param $1 i32) (result f64)
   (call $~lib/internal/string/parse<f64>
    (get_local $0)
    (get_local $1)
   )
  )
- (func $~lib/string/parseFloat (; 14 ;) (type $iF) (param $0 i32) (result f64)
+ (func $~lib/string/parseFloat (; 13 ;) (type $iF) (param $0 i32) (result f64)
   (local $1 i32)
   (local $2 i32)
   (local $3 i32)
@@ -1293,7 +1286,7 @@
    (get_local $4)
   )
  )
- (func $~lib/allocator/arena/__memory_allocate (; 15 ;) (type $ii) (param $0 i32) (result i32)
+ (func $~lib/allocator/arena/__memory_allocate (; 14 ;) (type $ii) (param $0 i32) (result i32)
   (local $1 i32)
   (local $2 i32)
   (local $3 i32)
@@ -1379,12 +1372,7 @@
   )
   (i32.const 0)
  )
- (func $~lib/memory/memory.allocate (; 16 ;) (type $ii) (param $0 i32) (result i32)
-  (call $~lib/allocator/arena/__memory_allocate
-   (get_local $0)
-  )
- )
- (func $~lib/internal/string/allocate (; 17 ;) (type $ii) (param $0 i32) (result i32)
+ (func $~lib/internal/string/allocate (; 15 ;) (type $ii) (param $0 i32) (result i32)
   (local $1 i32)
   (if
    (tee_local $1
@@ -1416,7 +1404,7 @@
   )
   (i32.store
    (tee_local $1
-    (call $~lib/memory/memory.allocate
+    (call $~lib/allocator/arena/__memory_allocate
      (i32.add
       (i32.shl
        (get_local $0)
@@ -1430,7 +1418,7 @@
   )
   (get_local $1)
  )
- (func $~lib/memory/memcpy (; 18 ;) (type $iiiv) (param $0 i32) (param $1 i32) (param $2 i32)
+ (func $~lib/internal/memory/memcpy (; 16 ;) (type $iiiv) (param $0 i32) (param $1 i32) (param $2 i32)
   (local $3 i32)
   (local $4 i32)
   (local $5 i32)
@@ -2816,7 +2804,7 @@
    )
   )
  )
- (func $~lib/memory/memmove (; 19 ;) (type $iiiv) (param $0 i32) (param $1 i32) (param $2 i32)
+ (func $~lib/internal/memory/memmove (; 17 ;) (type $iiiv) (param $0 i32) (param $1 i32) (param $2 i32)
   (local $3 i32)
   (local $4 i32)
   (if
@@ -2851,7 +2839,7 @@
   (if
    (get_local $3)
    (block
-    (call $~lib/memory/memcpy
+    (call $~lib/internal/memory/memcpy
      (get_local $0)
      (get_local $1)
      (get_local $2)
@@ -3108,14 +3096,7 @@
    )
   )
  )
- (func $~lib/memory/memory.copy (; 20 ;) (type $iiiv) (param $0 i32) (param $1 i32) (param $2 i32)
-  (call $~lib/memory/memmove
-   (get_local $0)
-   (get_local $1)
-   (get_local $2)
-  )
- )
- (func $~lib/string/String#concat (; 21 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
+ (func $~lib/string/String#concat (; 18 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
   (local $2 i32)
   (local $3 i32)
   (local $4 i32)
@@ -3162,7 +3143,7 @@
     (i32.const 8)
    )
   )
-  (call $~lib/memory/memory.copy
+  (call $~lib/internal/memory/memmove
    (i32.add
     (tee_local $2
      (call $~lib/internal/string/allocate
@@ -3175,20 +3156,21 @@
     (get_local $0)
     (i32.const 4)
    )
-   (tee_local $0
-    (i32.shl
-     (get_local $3)
-     (i32.const 1)
-    )
+   (i32.shl
+    (get_local $3)
+    (i32.const 1)
    )
   )
-  (call $~lib/memory/memory.copy
+  (call $~lib/internal/memory/memmove
    (i32.add
     (i32.add
      (get_local $2)
      (i32.const 4)
     )
-    (get_local $0)
+    (i32.shl
+     (get_local $3)
+     (i32.const 1)
+    )
    )
    (i32.add
     (get_local $1)
@@ -3201,7 +3183,7 @@
   )
   (get_local $2)
  )
- (func $~lib/string/String.__concat (; 22 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
+ (func $~lib/string/String.__concat (; 19 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
   (if
    (i32.eqz
     (get_local $0)
@@ -3215,7 +3197,7 @@
    (get_local $1)
   )
  )
- (func $~lib/string/String.__eq (; 23 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
+ (func $~lib/string/String.__eq (; 20 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
   (local $2 i32)
   (if
    (i32.eq
@@ -3262,7 +3244,7 @@
    )
   )
   (i32.eqz
-   (call $~lib/memory/memory.compare
+   (call $~lib/internal/memory/memcmp
     (i32.add
      (get_local $0)
      (i32.const 4)
@@ -3278,7 +3260,7 @@
    )
   )
  )
- (func $~lib/string/String.__ne (; 24 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
+ (func $~lib/string/String.__ne (; 21 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
   (i32.eqz
    (call $~lib/string/String.__eq
     (get_local $0)
@@ -3286,7 +3268,7 @@
    )
   )
  )
- (func $~lib/string/String.__gt (; 25 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
+ (func $~lib/string/String.__gt (; 22 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
   (local $2 i32)
   (local $3 i32)
   (if
@@ -3346,7 +3328,7 @@
    )
   )
   (i32.gt_s
-   (call $~lib/memory/memory.compare
+   (call $~lib/internal/memory/memcmp
     (i32.add
      (get_local $0)
      (i32.const 4)
@@ -3356,12 +3338,14 @@
      (i32.const 4)
     )
     (i32.shl
-     (select
-      (get_local $2)
-      (get_local $3)
-      (i32.lt_s
+     (tee_local $2
+      (select
        (get_local $2)
        (get_local $3)
+       (i32.lt_s
+        (get_local $2)
+        (get_local $3)
+       )
       )
      )
      (i32.const 1)
@@ -3370,7 +3354,7 @@
    (i32.const 0)
   )
  )
- (func $~lib/string/String.__gte (; 26 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
+ (func $~lib/string/String.__gte (; 23 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
   (local $2 i32)
   (local $3 i32)
   (if
@@ -3430,7 +3414,7 @@
    )
   )
   (i32.ge_s
-   (call $~lib/memory/memory.compare
+   (call $~lib/internal/memory/memcmp
     (i32.add
      (get_local $0)
      (i32.const 4)
@@ -3440,12 +3424,14 @@
      (i32.const 4)
     )
     (i32.shl
-     (select
-      (get_local $2)
-      (get_local $3)
-      (i32.lt_s
+     (tee_local $2
+      (select
        (get_local $2)
        (get_local $3)
+       (i32.lt_s
+        (get_local $2)
+        (get_local $3)
+       )
       )
      )
      (i32.const 1)
@@ -3454,7 +3440,7 @@
    (i32.const 0)
   )
  )
- (func $~lib/string/String.__lt (; 27 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
+ (func $~lib/string/String.__lt (; 24 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
   (local $2 i32)
   (local $3 i32)
   (if
@@ -3514,7 +3500,7 @@
    )
   )
   (i32.lt_s
-   (call $~lib/memory/memory.compare
+   (call $~lib/internal/memory/memcmp
     (i32.add
      (get_local $0)
      (i32.const 4)
@@ -3524,12 +3510,14 @@
      (i32.const 4)
     )
     (i32.shl
-     (select
-      (get_local $2)
-      (get_local $3)
-      (i32.lt_s
+     (tee_local $2
+      (select
        (get_local $2)
        (get_local $3)
+       (i32.lt_s
+        (get_local $2)
+        (get_local $3)
+       )
       )
      )
      (i32.const 1)
@@ -3538,7 +3526,7 @@
    (i32.const 0)
   )
  )
- (func $~lib/string/String.__lte (; 28 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
+ (func $~lib/string/String.__lte (; 25 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
   (local $2 i32)
   (local $3 i32)
   (if
@@ -3598,7 +3586,7 @@
    )
   )
   (i32.le_s
-   (call $~lib/memory/memory.compare
+   (call $~lib/internal/memory/memcmp
     (i32.add
      (get_local $0)
      (i32.const 4)
@@ -3608,12 +3596,14 @@
      (i32.const 4)
     )
     (i32.shl
-     (select
-      (get_local $2)
-      (get_local $3)
-      (i32.lt_s
+     (tee_local $2
+      (select
        (get_local $2)
        (get_local $3)
+       (i32.lt_s
+        (get_local $2)
+        (get_local $3)
+       )
       )
      )
      (i32.const 1)
@@ -3622,7 +3612,7 @@
    (i32.const 0)
   )
  )
- (func $~lib/string/String#repeat (; 29 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
+ (func $~lib/string/String#repeat (; 26 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
   (local $2 i32)
   (local $3 i32)
   (local $4 i32)
@@ -3735,7 +3725,7 @@
       (get_local $1)
      )
     )
-    (call $~lib/memory/memory.copy
+    (call $~lib/internal/memory/memmove
      (i32.add
       (i32.add
        (get_local $4)
@@ -3760,7 +3750,7 @@
   )
   (get_local $4)
  )
- (func $~lib/internal/itoa/decimalCountU32 (; 30 ;) (type $ii) (param $0 i32) (result i32)
+ (func $~lib/internal/itoa/decimalCountU32 (; 27 ;) (type $ii) (param $0 i32) (result i32)
   (local $1 i32)
   (local $2 i32)
   (set_local $2
@@ -3800,7 +3790,7 @@
    (i32.const 1)
   )
  )
- (func $~lib/internal/itoa/utoa32_lut (; 31 ;) (type $iiiv) (param $0 i32) (param $1 i32) (param $2 i32)
+ (func $~lib/internal/itoa/utoa32_lut (; 28 ;) (type $iiiv) (param $0 i32) (param $1 i32) (param $2 i32)
   (local $3 i32)
   (local $4 i32)
   (set_local $3
@@ -3961,7 +3951,7 @@
    )
   )
  )
- (func $~lib/internal/itoa/itoa32 (; 32 ;) (type $ii) (param $0 i32) (result i32)
+ (func $~lib/internal/itoa/itoa32 (; 29 ;) (type $ii) (param $0 i32) (result i32)
   (local $1 i32)
   (local $2 i32)
   (local $3 i32)
@@ -4012,7 +4002,7 @@
   )
   (get_local $2)
  )
- (func $~lib/internal/itoa/utoa32 (; 33 ;) (type $ii) (param $0 i32) (result i32)
+ (func $~lib/internal/itoa/utoa32 (; 30 ;) (type $ii) (param $0 i32) (result i32)
   (local $1 i32)
   (local $2 i32)
   (if
@@ -4038,7 +4028,7 @@
   )
   (get_local $2)
  )
- (func $~lib/internal/itoa/decimalCountU64 (; 34 ;) (type $Ii) (param $0 i64) (result i32)
+ (func $~lib/internal/itoa/decimalCountU64 (; 31 ;) (type $Ii) (param $0 i64) (result i32)
   (local $1 i32)
   (local $2 i64)
   (set_local $2
@@ -4086,7 +4076,7 @@
    (i32.const 1)
   )
  )
- (func $~lib/internal/itoa/utoa64_lut (; 35 ;) (type $iIiv) (param $0 i32) (param $1 i64) (param $2 i32)
+ (func $~lib/internal/itoa/utoa64_lut (; 32 ;) (type $iIiv) (param $0 i32) (param $1 i64) (param $2 i32)
   (local $3 i32)
   (local $4 i32)
   (local $5 i32)
@@ -4232,7 +4222,7 @@
    (get_local $2)
   )
  )
- (func $~lib/internal/itoa/utoa64 (; 36 ;) (type $Ii) (param $0 i64) (result i32)
+ (func $~lib/internal/itoa/utoa64 (; 33 ;) (type $Ii) (param $0 i64) (result i32)
   (local $1 i32)
   (local $2 i32)
   (local $3 i32)
@@ -4282,7 +4272,7 @@
   )
   (get_local $2)
  )
- (func $~lib/internal/itoa/itoa64 (; 37 ;) (type $Ii) (param $0 i64) (result i32)
+ (func $~lib/internal/itoa/itoa64 (; 34 ;) (type $Ii) (param $0 i64) (result i32)
   (local $1 i32)
   (local $2 i32)
   (local $3 i32)
@@ -4360,7 +4350,7 @@
   )
   (get_local $3)
  )
- (func $start (; 38 ;) (type $v)
+ (func $start (; 35 ;) (type $v)
   (set_global $~lib/allocator/arena/startOffset
    (i32.const 2520)
   )

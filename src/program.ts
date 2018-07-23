@@ -341,6 +341,13 @@ export class Program extends DiagnosticEmitter {
   /** Memory allocation function. */
   memoryAllocateInstance: Function | null = null;
 
+  /** Whether a garbage collector is present or not. */
+  hasGC: bool = false;
+  /** Garbage collector link function called when a managed object is referenced from a parent. */
+  gcLinkInstance: Function | null = null;
+  /** Garbage collector mark function called to on reachable managed objects. */
+  gcMarkInstance: Function | null = null;
+
   /** Currently processing filespace. */
   currentFilespace: Filespace;
 
@@ -657,6 +664,29 @@ export class Program extends DiagnosticEmitter {
           if (instance) this.memoryAllocateInstance = instance;
         }
       }
+    }
+
+    // register '__gc_link' and '__gc_mark' if present
+    if (this.elementsLookup.has("__gc_link") && this.elementsLookup.has("__gc_mark")) {
+
+      let gcLinkElement = <Element>this.elementsLookup.get("__gc_link");
+      assert(gcLinkElement.kind == ElementKind.FUNCTION_PROTOTYPE);
+      let gcLinkInstance = assert(this.resolver.resolveFunction(<FunctionPrototype>gcLinkElement, null));
+      assert(gcLinkInstance.signature.parameterTypes.length == 2);
+      assert(gcLinkInstance.signature.parameterTypes[0] == this.options.usizeType);
+      assert(gcLinkInstance.signature.parameterTypes[1] == this.options.usizeType);
+      assert(gcLinkInstance.signature.returnType == Type.void);
+
+      let gcMarkElement = <Element>this.elementsLookup.get("__gc_mark");
+      assert(gcMarkElement.kind == ElementKind.FUNCTION_PROTOTYPE);
+      let gcMarkInstance = assert(this.resolver.resolveFunction(<FunctionPrototype>gcMarkElement, null));
+      assert(gcMarkInstance.signature.parameterTypes.length == 1);
+      assert(gcMarkInstance.signature.parameterTypes[0] == this.options.usizeType);
+      assert(gcMarkInstance.signature.returnType == Type.void);
+
+      this.gcLinkInstance = gcLinkInstance;
+      this.gcMarkInstance = gcMarkInstance;
+      this.hasGC = true;
     }
   }
 

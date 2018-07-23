@@ -89,11 +89,13 @@ export class Array<T> {
       this.length_ = index + 1;
     }
     storeUnsafe<T,T>(buffer, index, value);
+    if (isManaged<T>()) __gc_link(changetype<usize>(this), changetype<usize>(value)); // tslint:disable-line
   }
 
   @operator("{}=")
   private __unchecked_set(index: i32, value: T): void {
     storeUnsafe<T,T>(this.buffer_, index, value);
+    if (isManaged<T>()) __gc_link(changetype<usize>(this), changetype<usize>(value)); // tslint:disable-line
   }
 
   includes(searchElement: T, fromIndex: i32 = 0): bool {
@@ -146,6 +148,7 @@ export class Array<T> {
     }
     this.length_ = newLength;
     storeUnsafe<T,T>(buffer, length, element);
+    if (isManaged<T>()) __gc_link(changetype<usize>(this), changetype<usize>(element)); // tslint:disable-line
     return newLength;
   }
 
@@ -253,6 +256,7 @@ export class Array<T> {
     );
     storeUnsafe<T,T>(buffer, 0, element);
     this.length_ = newLength;
+    if (isManaged<T>()) __gc_link(changetype<usize>(this), changetype<usize>(element)); // tslint:disable-line
     return newLength;
   }
 
@@ -326,6 +330,18 @@ export class Array<T> {
         ? insertionSort<T>(this, comparator)
         : weakHeapSort<T>(this, comparator)
       );
+    }
+  }
+
+  private __gc(): void {
+    if (isManaged<T>()) {
+      let buffer = this.buffer_;
+      let offset: usize = 0;
+      let end = <usize>this.length_ << alignof<usize>();
+      while (offset < end) {
+        __gc_mark(load<usize>(changetype<usize>(buffer) + offset, HEADER_SIZE_AB)); // tslint:disable-line
+        offset += sizeof<usize>();
+      }
     }
   }
 }

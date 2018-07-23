@@ -4808,6 +4808,7 @@ export class Compiler extends DiagnosticEmitter {
           );
           let tempLocalIndex = tempLocal.index;
           // TODO: simplify if valueWithCorrectType has no side effects
+          // TODO: call __gc_link here if a GC is present
           return module.createBlock(null, [
             module.createSetLocal(tempLocalIndex, valueWithCorrectType),
             module.createStore(
@@ -4820,6 +4821,7 @@ export class Compiler extends DiagnosticEmitter {
             module.createGetLocal(tempLocalIndex, nativeType)
           ], nativeType);
         } else {
+          // TODO: call __gc_link here if a GC is present
           return module.createStore(
             type.byteSize,
             thisExpr,

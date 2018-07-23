@@ -134,7 +134,7 @@ export function compileCall(
       compiler.currentType = Type.bool;
       if (!type) return module.createUnreachable();
       let classType = type.classReference;
-      return classType != null && classType.lookupOverload(OperatorKind.INDEXED_GET) != null
+      return classType !== null && classType.lookupOverload(OperatorKind.INDEXED_GET) !== null
         ? module.createI32(1)
         : module.createI32(0);
     }
@@ -174,6 +174,19 @@ export function compileCall(
       let expr = compiler.compileExpressionRetainType(operands[0], Type.i32, WrapMode.NONE);
       compiler.currentType = Type.bool;
       return module.createI32(getExpressionId(expr) == ExpressionId.Const ? 1 : 0);
+    }
+    case "isManaged": { // isManaged<T>() -> bool
+      if (!compiler.program.hasGC) {
+        compiler.currentType = Type.bool;
+        return module.createI32(0);
+      }
+      let type = evaluateConstantType(compiler, typeArguments, operands, reportNode);
+      compiler.currentType = Type.bool;
+      if (!type) return module.createUnreachable();
+      let classType = type.classReference;
+      return classType !== null && !classType.hasDecorator(DecoratorFlags.UNMANAGED)
+        ? module.createI32(1)
+        : module.createI32(0);
     }
 
     // math

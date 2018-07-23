@@ -130,7 +130,7 @@
    )
   )
  )
- (func $~lib/memory/memcmp (; 6 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
+ (func $~lib/internal/memory/memcmp (; 6 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
   (local $3 i32)
   (if
    (i32.eq
@@ -200,14 +200,7 @@
    (i32.const 0)
   )
  )
- (func $~lib/memory/memory.compare (; 7 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
-  (call $~lib/memory/memcmp
-   (get_local $0)
-   (get_local $1)
-   (get_local $2)
-  )
- )
- (func $~lib/string/String#startsWith (; 8 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
+ (func $~lib/string/String#startsWith (; 7 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
   (local $3 i32)
   (local $4 i32)
   (local $5 i32)
@@ -297,29 +290,40 @@
    )
   )
   (i32.eqz
-   (call $~lib/memory/memory.compare
-    (i32.add
+   (block $~lib/memory/memory.compare|inlined.0 (result i32)
+    (set_local $5
      (i32.add
-      (get_local $0)
+      (i32.add
+       (get_local $0)
+       (get_global $~lib/internal/string/HEADER_SIZE)
+      )
+      (i32.shl
+       (get_local $8)
+       (i32.const 1)
+      )
+     )
+    )
+    (set_local $6
+     (i32.add
+      (get_local $1)
       (get_global $~lib/internal/string/HEADER_SIZE)
      )
+    )
+    (set_local $7
      (i32.shl
-      (get_local $8)
+      (get_local $9)
       (i32.const 1)
      )
     )
-    (i32.add
-     (get_local $1)
-     (get_global $~lib/internal/string/HEADER_SIZE)
-    )
-    (i32.shl
-     (get_local $9)
-     (i32.const 1)
+    (call $~lib/internal/memory/memcmp
+     (get_local $5)
+     (get_local $6)
+     (get_local $7)
     )
    )
   )
  )
- (func $std/array-access/stringArrayMethodCall (; 9 ;) (type $ii) (param $0 i32) (result i32)
+ (func $std/array-access/stringArrayMethodCall (; 8 ;) (type $ii) (param $0 i32) (result i32)
   (call $~lib/string/String#startsWith
    (call $~lib/array/Array<String>#__get
     (get_local $0)
@@ -329,7 +333,7 @@
    (i32.const 0)
   )
  )
- (func $~lib/array/Array<Array<String>>#__get (; 10 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
+ (func $~lib/array/Array<Array<String>>#__get (; 9 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
   (local $2 i32)
   (set_local $2
    (i32.load
@@ -360,7 +364,7 @@
    (unreachable)
   )
  )
- (func $std/array-access/stringArrayArrayPropertyAccess (; 11 ;) (type $ii) (param $0 i32) (result i32)
+ (func $std/array-access/stringArrayArrayPropertyAccess (; 10 ;) (type $ii) (param $0 i32) (result i32)
   (i32.load
    (call $~lib/array/Array<String>#__get
     (call $~lib/array/Array<Array<String>>#__get
@@ -371,7 +375,7 @@
    )
   )
  )
- (func $std/array-access/stringArrayArrayMethodCall (; 12 ;) (type $ii) (param $0 i32) (result i32)
+ (func $std/array-access/stringArrayArrayMethodCall (; 11 ;) (type $ii) (param $0 i32) (result i32)
   (call $~lib/string/String#startsWith
    (call $~lib/array/Array<String>#__get
     (call $~lib/array/Array<Array<String>>#__get
