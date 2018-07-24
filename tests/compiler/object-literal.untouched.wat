@@ -134,36 +134,29 @@
    )
   )
  )
- (func $~lib/internal/memory/memcmp (; 3 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
+ (func $~lib/internal/string/compareUTF16 (; 3 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
   (local $3 i32)
-  (if
-   (i32.eq
-    (get_local $0)
-    (get_local $1)
-   )
-   (return
-    (i32.const 0)
-   )
+  (set_local $3
+   (i32.const 0)
   )
   (block $break|0
    (loop $continue|0
     (if
      (if (result i32)
-      (tee_local $3
-       (i32.ne
-        (get_local $2)
-        (i32.const 0)
+      (get_local $2)
+      (i32.eqz
+       (tee_local $3
+        (i32.sub
+         (i32.load16_u offset=4
+          (get_local $0)
+         )
+         (i32.load16_u offset=4
+          (get_local $1)
+         )
+        )
        )
       )
-      (i32.eq
-       (i32.load8_u
-        (get_local $0)
-       )
-       (i32.load8_u
-        (get_local $1)
-       )
-      )
-      (get_local $3)
+      (get_local $2)
      )
      (block
       (block
@@ -191,24 +184,11 @@
     )
    )
   )
-  (if (result i32)
-   (get_local $2)
-   (i32.sub
-    (i32.load8_u
-     (get_local $0)
-    )
-    (i32.load8_u
-     (get_local $1)
-    )
-   )
-   (i32.const 0)
-  )
+  (get_local $3)
  )
  (func $~lib/string/String.__eq (; 4 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
   (local $2 i32)
   (local $3 i32)
-  (local $4 i32)
-  (local $5 i32)
   (if
    (i32.eq
     (get_local $0)
@@ -253,30 +233,10 @@
    )
   )
   (i32.eqz
-   (block $~lib/memory/memory.compare|inlined.0 (result i32)
-    (set_local $2
-     (i32.add
-      (get_local $0)
-      (get_global $~lib/internal/string/HEADER_SIZE)
-     )
-    )
-    (set_local $4
-     (i32.add
-      (get_local $1)
-      (get_global $~lib/internal/string/HEADER_SIZE)
-     )
-    )
-    (set_local $5
-     (i32.shl
-      (get_local $3)
-      (i32.const 1)
-     )
-    )
-    (call $~lib/internal/memory/memcmp
-     (get_local $2)
-     (get_local $4)
-     (get_local $5)
-    )
+   (call $~lib/internal/string/compareUTF16
+    (get_local $0)
+    (get_local $1)
+    (get_local $3)
    )
   )
  )
