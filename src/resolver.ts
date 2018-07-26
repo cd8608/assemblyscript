@@ -378,7 +378,7 @@ export class Resolver extends DiagnosticEmitter {
       case ElementKind.LOCAL:
       case ElementKind.FIELD: {
         let type = (<VariableLikeElement>target).type;
-        assert(type != Type.void)
+        assert(type != Type.void);
         let classReference = type.classReference;
         if (!classReference) {
           this.error(

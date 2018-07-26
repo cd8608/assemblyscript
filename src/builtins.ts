@@ -50,7 +50,8 @@ import {
   OperatorKind,
   FlowFlags,
   Global,
-  DecoratorFlags
+  DecoratorFlags,
+  Function
 } from "./program";
 
 import {
@@ -2894,25 +2895,46 @@ export function compileAllocate(
   assert(classInstance.program == program);
   var module = compiler.module;
   var options = compiler.options;
-  var allocateInstance = program.memoryAllocateInstance;
-  if (!allocateInstance) {
-    program.error(
-      DiagnosticCode.Cannot_find_name_0,
-      reportNode.range, "memory.allocate"
-    );
-    return module.createUnreachable();
-  }
-  if (!compiler.compileFunction(allocateInstance)) return module.createUnreachable();
 
-  compiler.currentType = classInstance.type;
-  return module.createCall(
-    allocateInstance.internalName, [
-      options.isWasm64
-        ? module.createI64(classInstance.currentMemoryOffset)
-        : module.createI32(classInstance.currentMemoryOffset)
-    ],
-    options.nativeSizeType
-  );
+  // __gc_allocate(size, markFn)
+  if (program.hasGC && classInstance.type.isManaged(program)) {
+    let allocateInstance = assert(program.gcAllocateInstance);
+    if (!compiler.compileFunction(allocateInstance)) return module.createUnreachable();
+    compiler.currentType = classInstance.type;
+    return module.createCall(
+      allocateInstance.internalName, [
+        options.isWasm64
+          ? module.createI64(classInstance.currentMemoryOffset)
+          : module.createI32(classInstance.currentMemoryOffset),
+        module.createI32(
+          ensureGCHook(compiler, classInstance)
+        )
+      ],
+      options.nativeSizeType
+    );
+
+  // memory.allocate(size)
+  } else {
+    let allocateInstance = program.memoryAllocateInstance;
+    if (!allocateInstance) {
+      program.error(
+        DiagnosticCode.Cannot_find_name_0,
+        reportNode.range, "memory.allocate"
+      );
+      return module.createUnreachable();
+    }
+    if (!compiler.compileFunction(allocateInstance)) return module.createUnreachable();
+
+    compiler.currentType = classInstance.type;
+    return module.createCall(
+      allocateInstance.internalName, [
+        options.isWasm64
+          ? module.createI64(classInstance.currentMemoryOffset)
+          : module.createI32(classInstance.currentMemoryOffset)
+      ],
+      options.nativeSizeType
+    );
+  }
 }
 
 /** Compiles an abort wired to the conditionally imported 'abort' function. */
@@ -3000,4 +3022,122 @@ export function compileIterateRoots(compiler: Compiler): void {
       ? module.createBlock(null, exprs)
       : module.createNop()
   );
+}
+
+/** Ensures that the specified class's GC hook exists and returns its function table index. */
+export function ensureGCHook(
+  compiler: Compiler,
+  classInstance: Class
+): u32 {
+  var program = compiler.program;
+  assert(classInstance.type.isManaged(program));
+
+  // check if the GC hook has already been created
+  {
+    let existingIndex = classInstance.gcHookIndex;
+    if (existingIndex != <u32>-1) return existingIndex;
+  }
+
+  // check if the class implements a custom GC function (only valid for internals)
+  var members = classInstance.members;
+  if (classInstance.prototype.declaration.range.source.isLibrary) {
+    if (members !== null && members.has("__gc")) {
+      let customGC = assert(members.get("__gc"));
+      assert(customGC.kind == ElementKind.FUNCTION);
+      assert(customGC.is(CommonFlags.PRIVATE | CommonFlags.INSTANCE));
+      assert(!customGC.isAny(CommonFlags.AMBIENT | CommonFlags.VIRTUAL));
+      assert((<Function>customGC).signature.parameterTypes.length == 0);
+      assert((<Function>customGC).signature.returnType == Type.void);
+      customGC.internalName = classInstance.internalName + "~gc";
+      assert(compiler.compileFunction(<Function>customGC));
+      let index = compiler.ensureFunctionTableEntry(<Function>customGC);
+      classInstance.gcHookIndex = index;
+      return index;
+    }
+  }
+
+  var module = compiler.module;
+  var options = compiler.options;
+  var nativeSizeType = options.nativeSizeType;
+  var nativeSizeSize = options.usizeType.byteSize;
+  var body = new Array<ExpressionRef>();
+
+  // nothing to mark if 'this' is null
+  body.push(
+    module.createIf(
+      module.createUnary(
+        options.isWasm64
+          ? UnaryOp.EqzI64
+          : UnaryOp.EqzI32,
+        module.createGetLocal(0, nativeSizeType)
+      ),
+      module.createReturn()
+    )
+  );
+
+  // remember the function index so we don't recurse infinitely
+  var functionTable = compiler.functionTable;
+  var gcHookIndex = functionTable.length;
+  functionTable.push(0);
+  classInstance.gcHookIndex = gcHookIndex;
+
+  // if the class extends a base class, call its hook first (calls mark)
+  var baseInstance = classInstance.base;
+  if (baseInstance) {
+    assert(baseInstance.type.isManaged(program));
+    body.push(
+      module.createCallIndirect(
+        module.createI32(
+          ensureGCHook(compiler, <Class>baseInstance.type.classReference)
+        ),
+        [
+          module.createGetLocal(0, nativeSizeType)
+        ],
+        nativeSizeType == NativeType.I64 ? "Iv" : "iv"
+      )
+    );
+
+  // if this class is the top-most base class, mark the instance
+  } else {
+    body.push(
+      module.createCall(assert(program.gcMarkInstance).internalName, [
+        module.createGetLocal(0, nativeSizeType)
+      ], NativeType.None)
+    );
+  }
+
+  // mark instances assigned to own fields that are again references
+  if (members) {
+    for (let member of members.values()) {
+      if (member.kind == ElementKind.FIELD) {
+        if ((<Field>member).parent === classInstance) {
+          let type = (<Field>member).type;
+          if (type.isManaged(program)) {
+            let offset = (<Field>member).memoryOffset;
+            assert(offset >= 0);
+            body.push(
+              module.createCall(assert(program.gcMarkInstance).internalName, [
+                module.createLoad(
+                  nativeSizeSize,
+                  false,
+                  module.createGetLocal(0, nativeSizeType),
+                  nativeSizeType,
+                  offset
+                )
+              ], NativeType.None)
+            );
+          }
+        }
+      }
+    }
+  }
+
+  // add the function to the module and return its table index
+  functionTable[gcHookIndex] = module.addFunction(
+    classInstance.internalName + "~gc",
+    compiler.ensureFunctionType(null, Type.void, options.usizeType),
+    null,
+    module.createBlock(null, body)
+  );
+  return gcHookIndex;
 }

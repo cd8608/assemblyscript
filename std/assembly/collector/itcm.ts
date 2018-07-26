@@ -47,7 +47,7 @@ var iter: ManagedObject;
 // ├─────────────────────────────────────────────────────────┴─┴───┤   │ usize
 // │                              prev                             │ ◄─┘
 // ├───────────────────────────────────────────────────────────────┤
-// │                             markFn                            │
+// │                             hookFn                            │
 // ╞═══════════════════════════════════════════════════════════════╡ SIZE ┘ ◄─ user-space reference
 // │                          ... data ...                         │
 // └───────────────────────────────────────────────────────────────┘
@@ -62,8 +62,8 @@ var iter: ManagedObject;
   /** Pointer to the previous object. */
   prev: ManagedObject;
 
-  /** Object-specific mark function called with the user-space reference. */
-  markFn: (ref: usize) => void;
+  /** Class-specific hook function called with the user-space reference. */
+  hookFn: (ref: usize) => void;
 
   /** Size of a managed object after alignment. */
   static readonly SIZE: usize = (offsetof<ManagedObject>() + AL_MASK) & ~AL_MASK;
@@ -136,10 +136,10 @@ function step(): void {
     case State.INIT: {
       if (TRACE) trace("gc~step/INIT");
       fromSpace = changetype<ManagedObjectList>(memory.allocate(ManagedObject.SIZE));
-      fromSpace.markFn = changetype<(ref: usize) => void>(<u32>-1); // would error
+      fromSpace.hookFn = changetype<(ref: usize) => void>(<u32>-1); // would error
       fromSpace.clear();
       toSpace = changetype<ManagedObjectList>(memory.allocate(ManagedObject.SIZE));
-      toSpace.markFn = changetype<(ref: usize) => void>(<u32>-1); // would error
+      toSpace.hookFn = changetype<(ref: usize) => void>(<u32>-1); // would error
       toSpace.clear();
       iter = toSpace;
       state = State.IDLE;
@@ -159,7 +159,7 @@ function step(): void {
         if (TRACE) trace("gc~step/MARK iterate", 1, objToRef(obj));
         iter = obj;
         obj.color = <i32>!white;
-        obj.markFn(objToRef(obj));
+        obj.hookFn(objToRef(obj));
       } else {
         if (TRACE) trace("gc~step/MARK finish");
         iterateRoots(__gc_mark);
@@ -211,7 +211,7 @@ function step(): void {
   if (size > MAX_SIZE_32 - ManagedObject.SIZE) unreachable();
   step(); // also makes sure it's initialized
   var obj = changetype<ManagedObject>(memory.allocate(ManagedObject.SIZE + size));
-  obj.markFn = markFn;
+  obj.hookFn = markFn;
   obj.color = white;
   fromSpace.push(obj);
   return objToRef(obj);
