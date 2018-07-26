@@ -12,6 +12,7 @@
  (type $Iv (func (param i64)))
  (type $II (func (param i64) (result i64)))
  (type $iv (func (param i32)))
+ (type $iiiiii (func (param i32 i32 i32 i32 i32) (result i32)))
  (type $v (func))
  (import "env" "abort" (func $~lib/env/abort (param i32 i32 i32 i32)))
  (import "JSMath" "random" (func $~lib/math/JSMath.random (result f64)))
@@ -7903,47 +7904,67 @@
    )
   )
  )
- (func $~lib/internal/string/compareUTF16 (; 118 ;) (type $iiii) (param $0 i32) (param $1 i32) (param $2 i32) (result i32)
-  (local $3 i32)
-  (set_local $3
+ (func $~lib/internal/string/compareUnsafe (; 118 ;) (type $iiiiii) (param $0 i32) (param $1 i32) (param $2 i32) (param $3 i32) (param $4 i32) (result i32)
+  (local $5 i32)
+  (local $6 i32)
+  (local $7 i32)
+  (set_local $5
    (i32.const 0)
+  )
+  (set_local $6
+   (i32.add
+    (get_local $0)
+    (i32.shl
+     (get_local $1)
+     (i32.const 1)
+    )
+   )
+  )
+  (set_local $7
+   (i32.add
+    (get_local $2)
+    (i32.shl
+     (get_local $3)
+     (i32.const 1)
+    )
+   )
   )
   (block $break|0
    (loop $continue|0
     (if
      (if (result i32)
-      (get_local $2)
+      (get_local $4)
       (i32.eqz
-       (tee_local $3
+       (tee_local $5
         (i32.sub
          (i32.load16_u offset=4
-          (get_local $0)
+          (get_local $6)
          )
          (i32.load16_u offset=4
-          (get_local $1)
+          (get_local $7)
          )
         )
        )
       )
-      (get_local $2)
+      (get_local $4)
      )
      (block
       (block
-       (set_local $2
+       (set_local $4
         (i32.sub
-         (get_local $2)
+         (get_local $4)
          (i32.const 1)
         )
        )
-       (set_local $0
+       (set_local $6
         (i32.add
-         (get_local $0)
+         (get_local $6)
          (i32.const 1)
         )
        )
-       (set_local $1
+       (set_local $7
         (i32.add
-         (get_local $1)
+         (get_local $7)
          (i32.const 1)
         )
        )
@@ -7953,7 +7974,7 @@
     )
    )
   )
-  (get_local $3)
+  (get_local $5)
  )
  (func $~lib/string/String.__gt (; 119 ;) (type $iii) (param $0 i32) (param $1 i32) (result i32)
   (local $2 i32)
@@ -8029,9 +8050,11 @@
    )
   )
   (i32.gt_s
-   (call $~lib/internal/string/compareUTF16
+   (call $~lib/internal/string/compareUnsafe
     (get_local $0)
+    (i32.const 0)
     (get_local $1)
+    (i32.const 0)
     (get_local $6)
    )
    (i32.const 0)
@@ -8111,9 +8134,11 @@
    )
   )
   (i32.lt_s
-   (call $~lib/internal/string/compareUTF16
+   (call $~lib/internal/string/compareUnsafe
     (get_local $0)
+    (i32.const 0)
     (get_local $1)
+    (i32.const 0)
     (get_local $6)
    )
    (i32.const 0)
@@ -8589,9 +8614,11 @@
    )
   )
   (i32.eqz
-   (call $~lib/internal/string/compareUTF16
+   (call $~lib/internal/string/compareUnsafe
     (get_local $0)
+    (i32.const 0)
     (get_local $1)
+    (i32.const 0)
     (get_local $3)
    )
   )
@@ -8816,7 +8843,7 @@
     (call $~lib/env/abort
      (i32.const 0)
      (i32.const 696)
-     (i32.const 56)
+     (i32.const 58)
      (i32.const 4)
     )
     (unreachable)
@@ -8860,6 +8887,8 @@
   (local $6 i32)
   (local $7 i32)
   (local $8 i32)
+  (local $9 i32)
+  (local $10 i32)
   (if
    (i32.eqz
     (i32.ne
@@ -8916,60 +8945,91 @@
     (get_local $4)
    )
   )
-  (block $~lib/memory/memory.copy|inlined.4
+  (block $~lib/internal/string/copyUnsafe|inlined.0
    (set_local $6
-    (i32.add
-     (get_local $5)
-     (get_global $~lib/internal/string/HEADER_SIZE)
-    )
+    (i32.const 0)
    )
    (set_local $7
-    (i32.add
-     (get_local $0)
-     (get_global $~lib/internal/string/HEADER_SIZE)
-    )
+    (i32.const 0)
    )
-   (set_local $8
-    (i32.shl
-     (get_local $2)
-     (i32.const 1)
-    )
-   )
-   (call $~lib/internal/memory/memmove
-    (get_local $6)
-    (get_local $7)
-    (get_local $8)
-   )
-  )
-  (block $~lib/memory/memory.copy|inlined.5
-   (set_local $8
-    (i32.add
+   (block $~lib/memory/memory.copy|inlined.4
+    (set_local $8
      (i32.add
-      (get_local $5)
+      (i32.add
+       (get_local $5)
+       (i32.shl
+        (get_local $6)
+        (i32.const 1)
+       )
+      )
       (get_global $~lib/internal/string/HEADER_SIZE)
      )
+    )
+    (set_local $9
+     (i32.add
+      (i32.add
+       (get_local $0)
+       (i32.shl
+        (get_local $7)
+        (i32.const 1)
+       )
+      )
+      (get_global $~lib/internal/string/HEADER_SIZE)
+     )
+    )
+    (set_local $10
      (i32.shl
       (get_local $2)
       (i32.const 1)
      )
     )
+    (call $~lib/internal/memory/memmove
+     (get_local $8)
+     (get_local $9)
+     (get_local $10)
+    )
    )
+  )
+  (block $~lib/internal/string/copyUnsafe|inlined.1
    (set_local $7
-    (i32.add
-     (get_local $1)
-     (get_global $~lib/internal/string/HEADER_SIZE)
-    )
+    (i32.const 0)
    )
-   (set_local $6
-    (i32.shl
-     (get_local $3)
-     (i32.const 1)
+   (block $~lib/memory/memory.copy|inlined.5
+    (set_local $6
+     (i32.add
+      (i32.add
+       (get_local $5)
+       (i32.shl
+        (get_local $2)
+        (i32.const 1)
+       )
+      )
+      (get_global $~lib/internal/string/HEADER_SIZE)
+     )
     )
-   )
-   (call $~lib/internal/memory/memmove
-    (get_local $8)
-    (get_local $7)
-    (get_local $6)
+    (set_local $10
+     (i32.add
+      (i32.add
+       (get_local $1)
+       (i32.shl
+        (get_local $7)
+        (i32.const 1)
+       )
+      )
+      (get_global $~lib/internal/string/HEADER_SIZE)
+     )
+    )
+    (set_local $9
+     (i32.shl
+      (get_local $3)
+      (i32.const 1)
+     )
+    )
+    (call $~lib/internal/memory/memmove
+     (get_local $6)
+     (get_local $10)
+     (get_local $9)
+    )
    )
   )
   (get_local $5)
